@@ -57,6 +57,10 @@ socket.addEventListener('message', (event) => {
     } else if(data.type === 'playerMove') {
         players[data.id].sprite.x = +data.x;
         players[data.id].sprite.y = +data.y;
+    } else if(data.type === 'removePlayer') {
+        app.stage.removeChild(players[data.id].sprite);
+        delete players[data.id];
+        
     }
 });
 
@@ -107,4 +111,8 @@ function moveSprite(sprite, direction) {
             sprite.x -= a;
             break;
     }
+}
+
+window.onbeforeunload = () => {
+    sendMessage({type: 'close', id: myself.id})
 }

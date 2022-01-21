@@ -21,10 +21,11 @@ wss.on('connection', ws => {
     console.log('new client connected');
     currentId++;
     players[currentId] = { x: null, y: null };
+
     const currentPlayers = Object.keys(players).map(key => {
         const item = players[key];
         return {id: key, ...item};
-    })
+    });
     ws.send(s({ type: 'welcome', id: currentId.toString(), currentPlayers }));
     sendToAll(ws, s({ type: 'newPlayer', id: currentId.toString() }))
 
@@ -41,6 +42,12 @@ wss.on('connection', ws => {
                 x: message.data.position.x,
                 y: message.data.position.y
             }));
+        } if(message.data.type === 'close') {
+            sendToAll(ws, s({
+                type: 'removePlayer',
+                id: message.data.id
+            }))
+            delete players[message.data.id];
         }
 
     });
