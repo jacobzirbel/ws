@@ -43,7 +43,6 @@ socket.onmessage = (event) => {
         console.log('data.currentPlayers', data.currentPlayers)
         data.currentPlayers.forEach(player => {
             if(player.id == myself.id) return;
-            console.log('')
             const sprite = new PIXI.Sprite.from("images/blue-player.png");
             sprite.anchor.set(0.5);
             sprite.x = +player.x;

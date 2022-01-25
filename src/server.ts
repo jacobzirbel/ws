@@ -55,7 +55,7 @@ echo.on('connection', conn => {
 echo.installHandlers(server, { prefix: '/echo' });
 
 app.get('/api/move', (req, res) => {
-    res.json(['tester']);
+    res.json(['tester-abc']);
 })
 
 app.get("*", (req, res) => {
