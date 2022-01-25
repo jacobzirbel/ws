@@ -1,46 +1,43 @@
-import { WebSocket } from "ws";
-const express = require("express");
+import * as http from 'http';
+import sockjs from 'sockjs';
+import { Players } from './models/player.model';
+import express from 'express';
+import path from 'path';
 const app = express();
-const path = require("path");
 const PORT = process.env.PORT || 3000;
-const server = require('http').createServer(app);
+const server = http.createServer(app);
 
+
+const echo = sockjs.createServer();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(__dirname + '/public'));
-const wss = new WebSocket.Server({ server })
 
-let currentId = 0;
-let players = {};
+let players: Players = {};
 
-wss.on('connection', ws => {
-    console.log('new client connected');
-    currentId++; 
-    players[currentId] = { x: null, y: null };
+echo.on('connection', conn => {
+    players[conn.id] = { x: 0, y: 0, connection: conn };
 
     const currentPlayers = Object.keys(players).map(key => {
-        const item = players[key];
+        const { connection, ...item } = players[key];
         return { id: key, ...item };
     });
-    ws.send(s({ type: 'welcome', id: currentId.toString(), currentPlayers }));
-    sendToAll(ws, s({ type: 'newPlayer', id: currentId.toString() }))
+    conn.write(s({ type: 'welcome', id: conn.id, currentPlayers }));
+    sendToAll(conn, s({ type: 'newPlayer', id: conn.id }))
 
-    ws.on('message', (message: any) => {
-        console.log('recieved ' + message);
-        message = JSON.parse(message);
-        console.log('message.data.type', message.data.type)
+    conn.on('data', (msg) => {
+        const message: any = JSON.parse(msg);
         if (message.data.type === 'move') {
-            players[message.data.id] = message.data.position;
-            console.log(JSON.stringify(players))
-            sendToAll(ws, s({
+            players[message.data.id] = { ...players[message.data.id], ...message.data.position };
+            sendToAll(conn, s({
                 type: 'playerMove',
                 id: message.data.id.toString(),
                 x: message.data.position.x,
                 y: message.data.position.y
             }));
         } if (message.data.type === 'close') {
-            sendToAll(ws, s({
+            sendToAll(conn, s({
                 type: 'removePlayer',
                 id: message.data.id
             }))
@@ -49,19 +46,19 @@ wss.on('connection', ws => {
 
     });
 
-    ws.on('close', data => {
+    conn.on('close', data => {
         console.log('CLOSE', data)
     })
 
 })
 
+echo.installHandlers(server, { prefix: '/echo' });
 
 app.get('/api/move', (req, res) => {
     res.json(['tester']);
 })
 
 app.get("*", (req, res) => {
-    console.log('home');
     return res.sendFile(path.join(__dirname, "public/index.html"));
 });
 
@@ -77,10 +74,10 @@ function p(json) {
     return JSON.parse(json);
 }
 
-function sendToAll(ws, message) {
-    wss.clients.forEach(client => {
-        if (client !== ws && client.readyState === WebSocket.OPEN) {
-            client.send(message);
-        }
+function sendToAll(conn: sockjs.Connection, message) {
+    Object.keys(players).forEach(k => {
+        if(k !== conn.id){
+            players[k].connection.write(message);
+        };
     })
 }

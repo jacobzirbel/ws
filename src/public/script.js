@@ -2,7 +2,7 @@
 let app;
 let myself = { id: null };
 let players = {};
-const socket = new WebSocket('ws://localhost:3000');
+const socket = new SockJS('/echo');
 
 
 app = new PIXI.Application(
@@ -16,10 +16,11 @@ app = new PIXI.Application(
 document.body.appendChild(app.view);
 
 
-socket.addEventListener('open', (event) => {
-    console.log('connected to ws server')
-});
-socket.addEventListener('message', (event) => {
+socket.onopen = (event) => {
+    console.log('connected to ws server', event)
+};
+
+socket.onmessage = (event) => {
     const data = JSON.parse(event.data);
     console.log('new message from server', data)
     if (data.type === 'newPlayer') {
@@ -42,6 +43,7 @@ socket.addEventListener('message', (event) => {
         console.log('data.currentPlayers', data.currentPlayers)
         data.currentPlayers.forEach(player => {
             if(player.id == myself.id) return;
+            console.log('')
             const sprite = new PIXI.Sprite.from("images/blue-player.png");
             sprite.anchor.set(0.5);
             sprite.x = +player.x;
@@ -62,10 +64,10 @@ socket.addEventListener('message', (event) => {
         delete players[data.id];
         
     }
-});
+};
 
 const sendMessage = (data) => {
-    socket.send(JSON.stringify({ id: self.id, data: data }));
+    socket.send(JSON.stringify({ id: myself.id, data: data }));
 }
 
 
