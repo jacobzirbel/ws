@@ -62,9 +62,7 @@ app.get("*", (req, res) => {
     return res.sendFile(path.join(__dirname, "public/index.html"));
 });
 
-server.listen(PORT, () => {
-    console.log("on " + PORT);
-});
+server.listen(PORT, '0.0.0.0');
 
 function s(json) {
     return JSON.stringify(json);
