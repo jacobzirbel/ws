@@ -69,17 +69,7 @@ const sendMessage = (data) => {
     socket.send(JSON.stringify({ id: myself.id, data: data }));
 }
 
-
-// fetch("/api/move").then(response => {
-//     return response.json();
-// }).then(data => {
-//     console.log(data)
-// });
-
-
-
-
-document.addEventListener('keyup', (e) => {
+document.addEventListener('keydown', (e) => {
     moveSprite(myself.sprite, e.key)
     const message = { id: myself.id, type: "move", position: { x: myself.sprite.x, y: myself.sprite.y } };
     sendMessage(message);
