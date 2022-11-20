@@ -25,14 +25,14 @@ socket.onmessage = (event) => {
     console.log('new message from server', data)
     if (data.type === 'newPlayer') {
         console.log('new player')
-        const sprite = new PIXI.Sprite.from("images/blue-player.png");
+        const sprite = PIXI.Sprite.from("images/blue-player.png");
         sprite.anchor.set(0.5);
         sprite.x = app.view.width / 2;
         sprite.y = app.view.height / 2;
         app.stage.addChild(sprite);
         players[data.id] = { sprite, x: null, y: null };
     } else if (data.type === 'welcome') {
-        const mysprite = new PIXI.Sprite.from("images/red-player.png");
+        const mysprite = PIXI.Sprite.from("images/red-player.png");
         mysprite.anchor.set(0.5);
         mysprite.x = app.view.width / 2;
         mysprite.y = app.view.height / 2;
@@ -43,7 +43,7 @@ socket.onmessage = (event) => {
         console.log('data.currentPlayers', data.currentPlayers)
         data.currentPlayers.forEach(player => {
             if(player.id == myself.id) return;
-            const sprite = new PIXI.Sprite.from("images/blue-player.png");
+            const sprite = PIXI.Sprite.from("images/blue-player.png");
             sprite.anchor.set(0.5);
             sprite.x = +player.x;
             sprite.y = +player.y;
