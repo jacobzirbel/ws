@@ -38,7 +38,7 @@ function calculate(val, inval) {
 function ask(q) {
     return new Promise(r => {
         const a = prompt(q);
-        r(a);
+        r(+a);
     });
 }
 
