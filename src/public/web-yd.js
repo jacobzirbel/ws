@@ -31,7 +31,7 @@ function calculate(val, inval) {
             calculated.push([[y, y]]);
         }
     };
-    alert(calculated);
+    alert(JSON.stringify(calculated));
 }
 
 
